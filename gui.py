@@ -1,3 +1,4 @@
+
 import tkinter as tk
 from tkinter import simpledialog, messagebox, ttk
 import logic
@@ -231,6 +232,7 @@ def page_plan():
     #Template 50-30-20
     tk.Button(
         main_page, text="Template 50-30-20",
+        command=logic.apply_503020,
         bg="white", fg="black", bd=0,
         font=("Poppins", 11), padx=8, pady=4
     ).pack(pady=5)
@@ -238,23 +240,24 @@ def page_plan():
     #PYF
     tk.Button(
         main_page, text="Template Pay Yourself First",
+        command=logic.apply_PYF,
         bg="white", fg="black", bd=0,
         font=("Poppins", 11), padx=8, pady=4
     ).pack(pady=5)
 
     #Reminder Tabungan
-    tk.Label(
+    tk.Button(
         main_page,
+        command=lambda: logic.start_saving_reminder(root),
         text="Reminder Tabungan",
-        bg="white",
-        fg="black",
-        font=("Poppins", 14, "bold")
+        bg="white", fg="black", bd=0,
+        font=("Poppins", 11), padx=8, pady=4
     ).pack(pady=20)
 
     #KALKU INFLASI
     tk.Button(
         main_page, text="Hitung Inflasi",
-        command=hitung_inflasi,
+        command=logic.hitung_inflasi,
         bg="black", fg="white", bd=0,
         font=("Poppins", 11), padx=10, pady=4
     ).pack(pady=10)
