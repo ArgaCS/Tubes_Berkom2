@@ -182,6 +182,7 @@ def tampilkan_data():
     except Exception as e:
         messagebox.showerror("Error", f"Terjadi kesalahan: {str(e)}")
 
+#Grafik Income Summary
 def pie_income():
     try:
         if not akun:
@@ -242,7 +243,7 @@ def pie_income():
     except Exception as e:
         messagebox.showerror("Error", f"Terjadi kesalahan: {str(e)}")
 
-# ===================== PIE CHART EXPENSE =====================
+# Grafik Expense Summary
 def pie_expense():
     try:
         if not akun:
