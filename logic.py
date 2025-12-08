@@ -4,6 +4,12 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Button
 
 akun = {} 
+current_plan_template = None
+plan_limits = {}
+saving_reminder_active = False
+saving_interval_days = 0
+saving_amount = 0
+saving_time = ""
 
 # TAMBAH AKUN
 def tambah_akun():
@@ -119,7 +125,7 @@ def tambah_transaksi():
         if not kategori:
             return  # User cancelled
             
-        kategori = kategori.strip()
+        kategori = kategori.strip().lower()
 
         if not kategori:
             messagebox.showwarning("Gagal", "Kategori tidak boleh kosong!")
@@ -138,6 +144,33 @@ def tambah_transaksi():
         except ValueError:
             messagebox.showwarning("Gagal", "Jumlah harus berupa angka!")
             return
+        
+        #TERAPKAN TEMPLATE FINANSIAL JIKA INCOME
+        if (current_plan_template == "50-30-20") and (jenis == "income"):
+            apply_503020()
+        elif  (current_plan_template == "PYF") and (jenis == "income"):
+            apply_PYF()
+            
+
+        # PLAN LIMIT CHECKING
+        bagian = None
+        if current_plan_template and jenis == "expense":
+            if kategori in ["makanan", "tagihan"]:
+                bagian = "needs"
+            elif kategori in ["entertainment"]:
+                bagian = "wants"
+            
+            if bagian:
+                total = sum(t["jumlah"] for t in akun[pilih]
+                            if t["jenis"] == "expense" and t["kategori"] == kategori)
+
+                if total + jumlah > plan_limits[bagian]:
+                    messagebox.showwarning(
+                        "Limit Exceeded",
+                        f"Pengeluaran kategori '{kategori}' sudah melebihi batas template {bagian}."
+                    )
+                    return
+        
 
         akun[pilih].append({"jenis": jenis, "kategori": kategori, "jumlah": jumlah})
         messagebox.showinfo("Sukses", f"Transaksi {jenis} '{kategori}' sebesar Rp {jumlah:,} berhasil ditambahkan ke akun '{pilih}'.")
@@ -381,3 +414,143 @@ def account_expense(account_name):
         return total
     except Exception:
         return 0
+    
+#Hitung inflasi
+def hitung_inflasi():
+    
+    nilai_masa_depan = 0
+    nilai_awal = 0
+
+    jenis_inflasi = simpledialog.askstring(
+            "Jenis Inflasi",
+            f"Nilai input sendiri atau balance? (sendiri/balance)"
+        )
+    
+    if not jenis_inflasi:
+        return  # User cancelled
+    
+    jenis_inflasi.strip().lower()
+
+    if jenis_inflasi == "sendiri":
+        nilai_awal = float(simpledialog.askstring("Hitung Inflasi", "Masukkan nilai uang saat ini:"))
+    elif jenis_inflasi == "balance":
+        nilai_awal = total_balance()
+
+    try:
+        inflasi = float(simpledialog.askstring("Inflasi", "Masukkan inflasi per tahun (%):"))
+        tahun = int(simpledialog.askstring("Tahun", "Masukkan jumlah tahun yang akan datang:"))
+    except:
+        messagebox.showwarning("Error", "Input tidak valid!")
+        return
+        
+    #RUMUS INFLASI
+    nilai_masa_depan = nilai_awal / ((1 + inflasi/100) ** tahun)
+
+    messagebox.showinfo(
+        "Hasil Inflasi",
+        f"Nilai uang Rp{nilai_awal:,.0f} \n"
+        f"dengan inflasi {inflasi}% selama {tahun} tahun\n\n"
+        f"Nilainya menjadi ≈ Rp{nilai_masa_depan:,.0f}"
+    )
+
+
+#Reminder pengingat menabung
+def start_saving_reminder(window_utama):
+    global saving_reminder_active
+
+    if saving_reminder_active:
+        messagebox.showinfo("Info", "Pengingat tabungan sudah berjalan.")
+        return
+
+    # --- SETTING (UBAH ANGKA DI SINI) ---
+    nominal = 50000          # Nominal yang diingatkan
+    interval_detik = 10      # Muncul setiap 10 detik (Ganti jadi 86400 untuk 1 hari)
+    # ------------------------------------
+
+    # Ubah status jadi aktif
+    saving_reminder_active = True
+    
+    # Beri info awal bahwa reminder dimulai
+    messagebox.showinfo("Aktif", f"Reminder aktif! Anda akan diingatkan menabung Rp {nominal:,} secara berkala.")
+
+    # Mulai hitungan mundur
+    loop_reminder(window_utama, nominal, interval_detik)
+
+
+def loop_reminder(window_utama, nominal, interval_detik):
+    global saving_reminder_active
+    
+    # Jika tombol dimatikan (opsional), berhenti
+    if not saving_reminder_active:
+        return
+
+    # Hitung milidetik
+    ms = interval_detik * 1000
+
+    # Jadwalkan fungsi pop-up
+    window_utama.after(ms, lambda: show_popup(window_utama, nominal, interval_detik))
+
+#Memunculkan pesan reminder
+def show_popup(window_target, nominal, interval_detik):
+    
+    messagebox.showinfo(
+        "Reminder Tabungan", 
+        f"Jangan lupa sisihkan Rp {nominal:,} untuk tabungan hari ini!"
+    )
+    
+   
+    loop_reminder(window_target, nominal, interval_detik)
+
+
+def apply_503020():
+    global current_plan_template, plan_limits
+
+    current_plan_template = "50-30-20"
+    plan_limits = {"needs": 0, "wants": 0, "savings": 0}
+    
+    balance = total_balance()
+
+    if balance <= 0:
+        messagebox.showinfo("Info", "Saldo masih kosong, template akan diterapkan ketika ada income.")
+        return
+
+    plan_limits["needs"] += balance * 0.50
+    plan_limits["wants"] += balance * 0.30
+    plan_limits["savings"] += balance * 0.20
+
+    messagebox.showinfo(
+        "Template Applied",
+        f"Template 50-30-20 berhasil diterapkan.\n\n"
+        f"Needs: Rp {int(plan_limits['needs']):,}\n"
+        f"Wants: Rp {int(plan_limits['wants']):,}\n"
+        f"Savings: Rp {int(plan_limits['savings']):,}"
+    )
+
+#Template Finansial pay yourself first
+def apply_PYF():
+    global current_plan_template, plan_limits
+
+    current_plan_template = "PYF"
+    plan_limits = {"needs": 0, "wants": 0, "savings": 0}
+
+    balance = total_balance()
+
+    if balance <= 0:
+        messagebox.showinfo("Info", "Saldo masih kosong, template akan diterapkan ketika ada income.")
+        return
+
+    plan_limits["savings"] += balance * 0.30
+    sisa = balance - plan_limits["savings"]
+    plan_limits["needs"] += sisa * 0.70
+    plan_limits["wants"] += sisa * 0.30
+
+    messagebox.showinfo(
+        "Template Applied",
+        f"Template Pay your self first berhasil diterapkan.\n\n"
+        f"Needs: Rp {int(plan_limits['needs']):,}\n"
+        f"Wants: Rp {int(plan_limits['wants']):,}\n"
+        f"Savings: Rp {int(plan_limits['savings']):,}"
+    )
+
+
+ 
