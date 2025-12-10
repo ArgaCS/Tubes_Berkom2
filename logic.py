@@ -364,45 +364,42 @@ def hitung_inflasi():
         f"Nilainya menjadi ≈ Rp{nilai_masa_depan:,.0f}"
     )
 
-
 #Reminder pengingat menabung
 def start_saving_reminder(window_utama):
     global saving_reminder_active
 
     if saving_reminder_active:
-        messagebox.showinfo("Info", "Pengingat tabungan sudah berjalan.")
-        return
+        matikan = messagebox.askyesno("Status Reminder", "Pengingat tabungan sudah berjalan. Apakah anda ingin mematikannya?")
 
-    # --- SETTING (UBAH ANGKA DI SINI) ---
-    nominal = 50000          # Nominal yang diingatkan
-    interval_detik = 10      # Muncul setiap 10 detik (Ganti jadi 86400 untuk 1 hari)
-    # ------------------------------------
+        if matikan:
+            saving_reminder_active = False
+            messagebox.showinfo("Info", "Reminder berhasil dimatikan.")
 
-    # Ubah status jadi aktif
+            return
+        
+    nominal = int(simpledialog.askstring("Masukan nominal yang ingin ditabung: "))
+    interval_hari = int(simpledialog.askstring("Masukkan frekuensi menabung (dalam hari): "))
+
+
     saving_reminder_active = True
     
-    # Beri info awal bahwa reminder dimulai
     messagebox.showinfo("Aktif", f"Reminder aktif! Anda akan diingatkan menabung Rp {nominal:,} secara berkala.")
 
-    # Mulai hitungan mundur
-    loop_reminder(window_utama, nominal, interval_detik)
+    loop_reminder(window_utama, nominal, interval_hari)
 
 
-def loop_reminder(window_utama, nominal, interval_detik):
+def loop_reminder(window_utama, nominal, interval_hari):
     global saving_reminder_active
     
-    # Jika tombol dimatikan (opsional), berhenti
     if not saving_reminder_active:
         return
 
-    # Hitung milidetik
-    ms = interval_detik * 1000
+    ms = interval_hari * 24 * 60 * 60 * 1000
 
-    # Jadwalkan fungsi pop-up
-    window_utama.after(ms, lambda: show_popup(window_utama, nominal, interval_detik))
+    window_utama.after(ms, lambda: show_popup(window_utama, nominal, interval_hari))
 
 #Memunculkan pesan reminder
-def show_popup(window_target, nominal, interval_detik):
+def show_popup(window_target, nominal, interval_hari):
     
     messagebox.showinfo(
         "Reminder Tabungan", 
@@ -410,7 +407,8 @@ def show_popup(window_target, nominal, interval_detik):
     )
     
    
-    loop_reminder(window_target, nominal, interval_detik)
+    loop_reminder(window_target, nominal, interval_hari)
+
 
 
 def apply_503020():
