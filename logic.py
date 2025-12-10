@@ -96,6 +96,8 @@ try:
                     messagebox.showwarning("Gagal", "Jenis transaksi hanya 'income' atau 'expense'!")
                     return
                 else:
+                    tanggal=simpledialog.askstring("Tanggal","Masukkan Tanggal Transaksi :\n(DD/MM/YYYY) ")
+                    tanggal=tanggal.strip()
                     jenis = jenis.strip().lower()  
 
         if jenis == "income":
@@ -108,12 +110,6 @@ try:
 
         if kategori=="":
             messagebox.showwarning("Gagal", "Kategori tidak boleh kosong!")
-            return
-        
-        tanggal=simpledialog.askstring("Tanggal","Masukkan Tanggal Transaksi :\n(DD/MM/YYYY) ")
-        tanggal=tanggal.strip()
-        if tanggal=="":
-            messagebox.showwarning("Gagal", "Tanggal tidak boleh kosong!")
             return
 
         # input jumlah uang
@@ -157,8 +153,22 @@ try:
                     )
                     return
         
+        transaksi_baru = {
+            "jenis": jenis,
+            "kategori": kategori,
+            "jumlah": jumlah,
+            "tanggal": tanggal
+        }
 
-        akun[pilih].append({"jenis": jenis, "kategori": kategori, "jumlah": jumlah})
+        list_lama = akun[pilih]
+        list_baru = []
+
+        for i in list_lama:
+            list_baru += [i]
+        
+        list_baru += [transaksi_baru]
+
+        akun[pilih] = list_baru
         messagebox.showinfo("Sukses", f"Transaksi {jenis} '{kategori}' sebesar Rp {jumlah:,} berhasil ditambahkan ke akun '{pilih}'.")
     except Exception as e:
         messagebox.showerror("Error", f"Terjadi kesalahan: {str(e)}")
