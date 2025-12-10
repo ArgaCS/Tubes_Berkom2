@@ -173,44 +173,6 @@ try:
     except Exception as e:
         messagebox.showerror("Error", f"Terjadi kesalahan: {str(e)}")
 
-# POP-UP OUTPUT: Tampilkan akun dan transaksi
-def tampilkan_data():
-    try:
-        if not akun:
-            messagebox.showinfo("Data", "Belum ada akun.")
-            return
-
-        output = "=== DATA KEUANGAN ===\n"
-
-        for nama, trans in akun.items():
-            output += f"\n{'='*40}\n"
-            output += f"Akun: {nama}\n"
-            output += f"{'='*40}\n"
-            
-            if not trans:
-                output += "  (Belum ada transaksi)\n"
-            else:
-                total_balance = 0
-            
-                for t in trans:
-                    if t["jenis"].lower() == "expense":
-                        jumlah_str = f"-Rp {t['jumlah']:,}"
-                        total_balance -= t["jumlah"]
-                    else:
-                        jumlah_str = f"+Rp {t['jumlah']:,}"
-                        total_balance += t["jumlah"]
-                    output += f"  {t['jenis'].capitalize():10} | {t['kategori']:20} | {jumlah_str}\n"
-                
-                output += f"\n  Total Balance Akun '{nama}': Rp {total_balance:,}\n"
-
-        output += f"\n{'='*40}\n"
-        output += f"TOTAL SEMUA AKUN: Rp {total_balance():,}\n"
-        output += f"{'='*40}\n"
-
-        messagebox.showinfo("Data Keuangan", output)
-    except Exception as e:
-        messagebox.showerror("Error", f"Terjadi kesalahan: {str(e)}")
-
 #Grafik Income Summary
 def pie_income():
     try:
@@ -361,53 +323,6 @@ def total_expense():
 def total_balance():
     try:
         return total_income() - total_expense()
-    except Exception:
-        return 0
-
-# BALANCE PER AKUN (BARU)
-def account_balance(account_name):
-    """Menghitung balance untuk akun tertentu"""
-    try:
-        if account_name not in akun:
-            return 0
-        
-        balance = 0
-        for t in akun[account_name]:
-            if t["jenis"] == "income":
-                balance += t["jumlah"]
-            else:  # expense
-                balance -= t["jumlah"]
-        return balance
-    except Exception:
-        return 0
-
-# INCOME PER AKUN (BARU)
-def account_income(account_name):
-    """Menghitung total income untuk akun tertentu"""
-    try:
-        if account_name not in akun:
-            return 0
-        
-        total = 0
-        for t in akun[account_name]:
-            if t["jenis"] == "income":
-                total += t["jumlah"]
-        return total
-    except Exception:
-        return 0
-
-# EXPENSE PER AKUN (BARU)
-def account_expense(account_name):
-    """Menghitung total expense untuk akun tertentu"""
-    try:
-        if account_name not in akun:
-            return 0
-        
-        total = 0
-        for t in akun[account_name]:
-            if t["jenis"] == "expense":
-                total += t["jumlah"]
-        return total
     except Exception:
         return 0
     
