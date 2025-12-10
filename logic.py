@@ -15,19 +15,18 @@ saving_time = ""
 def tambah_akun():
     try:
         nama = simpledialog.askstring("Tambah Akun", "Masukkan nama akun/dompet:")
-        if not nama:
-            return  # User cancelled
 
-        # Remove extra whitespace
         nama = nama.strip()
         
-        if not nama:
+        if nama=="":
             messagebox.showwarning("Peringatan", "Nama akun tidak boleh kosong!")
             return
-
-        if nama in akun:
-            messagebox.showwarning("Gagal", "Akun sudah ada.")
-            return
+        
+        keylist=list(akun.keys())
+        for i in range (len(keylist)):
+            if nama==keylist[i]:
+                messagebox.showwarning("Gagal", "Akun sudah ada.")
+                return
 
         akun[nama] = []
         messagebox.showinfo("Berhasil", f"Akun '{nama}' berhasil ditambahkan.")
@@ -37,104 +36,90 @@ def tambah_akun():
 # EDIT AKUN
 def edit_akun():
     try:
-        if not akun:
+       keylist=list(akun.keys())
+        if len(keylist)==0:
             messagebox.showwarning("Peringatan", "Belum ada akun yang bisa diedit.")
             return
         
-        # pilih akun
         pilih = simpledialog.askstring(
             "Edit Akun",
             f"Daftar akun:\n{', '.join(akun.keys())}\n\nMasukkan nama akun yang ingin diedit:"
         )
         
-        if not pilih:
-            return  # User cancelled
-            
         pilih = pilih.strip()
-        
-        if not pilih or pilih not in akun:
-            messagebox.showwarning("Gagal", "Akun tidak ditemukan.")
-            return
 
-        # input nama baru
-        nama_baru = simpledialog.askstring("Edit Akun", "Masukkan nama baru:")
-        if not nama_baru:
-            return  # User cancelled
-            
-        nama_baru = nama_baru.strip()
-        
-        if not nama_baru:
-            messagebox.showwarning("Peringatan", "Nama akun tidak boleh kosong!")
+        keylist=list(akun.keys())
+        for i in range (len(keylist)):
+            if pilih==keylist[i]:
+                nama_baru = simpledialog.askstring("Edit Akun", "Masukkan nama baru:")
+                nama_baru = nama_baru.strip()
+                if nama_baru=="":
+                    messagebox.showwarning("Peringatan", "Nama akun tidak boleh kosong!")
+                    return
+                else:
+                    akun[nama_baru] = akun.pop(pilih)
+                messagebox.showinfo("Berhasil", f"Akun '{pilih}' berhasil diubah menjadi '{nama_baru}'.")
+                return
+            else:
+                messagebox.showwarning("Gagal", "Akun tidak ditemukan.")
             return
-
-        if nama_baru in akun:
-            messagebox.showwarning("Gagal", "Nama baru sudah digunakan.")
-            return
-
-        # ganti nama akun
-        akun[nama_baru] = akun.pop(pilih)
-        messagebox.showinfo("Berhasil", f"Akun '{pilih}' berhasil diubah menjadi '{nama_baru}'.")
     except Exception as e:
         messagebox.showerror("Error", f"Terjadi kesalahan: {str(e)}")
 
 # TAMBAH PEMASUKAN / PENGELUARAN
 def tambah_transaksi():
-    try:
-        if not akun:
-            messagebox.showwarning("Peringatan", "Belum ada akun! Silakan tambah akun terlebih dahulu.")
+try:
+        keylist=list(akun.keys())
+        if len(keylist)==0:
+            messagebox.showwarning("Peringatan", "Belum ada akun! Silakan buat akun terlebih dahulu.")
             return
 
-        # pilih akun
         pilih = simpledialog.askstring(
             "Tambah Transaksi",
             f"Daftar akun:\n{', '.join(akun.keys())}\n\nMasukkan nama akun:"
         )
 
-        if not pilih:
-            return  # User cancelled
-            
         pilih = pilih.strip()
+        
+        if pilih=="":
+            messagebox.showwarning("Peringatan", "Nama Akun tidak boleh kosong.")
+            return  
 
-        if not pilih or pilih not in akun:
-            messagebox.showwarning("Gagal", "Akun tidak ditemukan!")
-            return
+        keylist=list(akun.keys())
+        for i in range (len(keylist)):
+            if pilih==keylist[i]:
+                jenis = simpledialog.askstring("Jenis Transaksi", "Masukkan jenis transaksi (income/expense):")
+                if jenis=="":
+                    messagebox.showwarning("Peringatan", "Nama akun tidak boleh kosong!")
+                    return
+                elif not (jenis=="income" or jenis=="expense"):
+                    messagebox.showwarning("Gagal", "Jenis transaksi hanya 'income' atau 'expense'!")
+                    return
+                else:
+                    jenis = jenis.strip().lower()  
 
-        # pilih jenis transaksi
-        jenis = simpledialog.askstring(
-            "Jenis Transaksi",
-            "Masukkan jenis transaksi (income/expense):"
-        )
-
-        if not jenis:
-            return  # User cancelled
-            
-        jenis = jenis.strip().lower()
-
-        if jenis not in ["income", "expense"]:
-            messagebox.showwarning("Gagal", "Jenis transaksi hanya 'income' atau 'expense'!")
-            return
-
-        # pilih kategori
         if jenis == "income":
             prompt = "Masukkan kategori untuk transaksi income:\nMisalnya: Gaji, Proyek, Uang Bulanan"
         else:
             prompt = "Masukkan kategori untuk transaksi expense:\nMisalnya: Makanan, Tagihan, Entertainment"
         
-        kategori = simpledialog.askstring("Kategori Transaksi", prompt)
+        kategori = simpledialog.askstring("Kategori Transaksi", prompt) 
+        kategori = kategori.strip()
 
-        if not kategori:
-            return  # User cancelled
-            
-        kategori = kategori.strip().lower()
-
-        if not kategori:
+        if kategori=="":
             messagebox.showwarning("Gagal", "Kategori tidak boleh kosong!")
+            return
+        
+        tanggal=simpledialog.askstring("Tanggal","Masukkan Tanggal Transaksi :\n(DD/MM/YYYY) ")
+        tanggal=tanggal.strip()
+        if tanggal=="":
+            messagebox.showwarning("Gagal", "Tanggal tidak boleh kosong!")
             return
 
         # input jumlah uang
         jumlah_str = simpledialog.askstring("Jumlah Uang", "Masukkan jumlah (angka):")
         if not jumlah_str:
-            return  # User cancelled
+            return 
             
         try:
             jumlah = int(jumlah_str.strip())
@@ -144,6 +129,7 @@ def tambah_transaksi():
         except ValueError:
             messagebox.showwarning("Gagal", "Jumlah harus berupa angka!")
             return
+
         
         #TERAPKAN TEMPLATE FINANSIAL JIKA INCOME
         if (current_plan_template == "50-30-20") and (jenis == "income"):
