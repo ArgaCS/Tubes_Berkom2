@@ -377,8 +377,8 @@ def start_saving_reminder(window_utama):
 
             return
         
-    nominal = int(simpledialog.askstring("Masukan nominal yang ingin ditabung: "))
-    interval_hari = int(simpledialog.askstring("Masukkan frekuensi menabung (dalam hari): "))
+    nominal = int(simpledialog.askstring("Nominal","Masukan nominal yang ingin ditabung: "))
+    interval_hari = int(simpledialog.askstring("Waktu Menabung","Masukkan frekuensi menabung (dalam hari): "))
 
 
     saving_reminder_active = True
