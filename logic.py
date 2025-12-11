@@ -11,6 +11,7 @@ saving_interval_days = 0
 saving_amount = 0
 saving_time = ""
 
+
 # TAMBAH AKUN
 def tambah_akun():
     try:
@@ -32,6 +33,7 @@ def tambah_akun():
         messagebox.showinfo("Berhasil", f"Akun '{nama}' berhasil ditambahkan.")
     except Exception as e:
         messagebox.showerror("Error", f"Terjadi kesalahan: {str(e)}")
+
 
 # EDIT AKUN
 def edit_akun():
@@ -66,12 +68,12 @@ def edit_akun():
     except Exception as e:
         messagebox.showerror("Error", f"Terjadi kesalahan: {str(e)}")
 
-# TAMBAH PEMASUKAN / PENGELUARAN
+
+# TAMBAH TRANSAKSI PEMASUKAN / PENGELUARAN
 def tambah_transaksi():
-try:
-        keylist=list(akun.keys())
-        if len(keylist)==0:
-            messagebox.showwarning("Peringatan", "Belum ada akun! Silakan buat akun terlebih dahulu.")
+    try:
+        if not akun:
+            messagebox.showwarning("Peringatan", "Belum ada akun! Silakan tambah akun terlebih dahulu.")
             return
 
         pilih = simpledialog.askstring(
@@ -79,43 +81,48 @@ try:
             f"Daftar akun:\n{', '.join(akun.keys())}\n\nMasukkan nama akun:"
         )
 
+        if not pilih:
+            return
+            
         pilih = pilih.strip()
-        
-        if pilih=="":
-            messagebox.showwarning("Peringatan", "Nama Akun tidak boleh kosong.")
-            return  
 
-        keylist=list(akun.keys())
-        for i in range (len(keylist)):
-            if pilih==keylist[i]:
-                jenis = simpledialog.askstring("Jenis Transaksi", "Masukkan jenis transaksi (income/expense):")
-                if jenis=="":
-                    messagebox.showwarning("Peringatan", "Nama akun tidak boleh kosong!")
-                    return
-                elif not (jenis=="income" or jenis=="expense"):
-                    messagebox.showwarning("Gagal", "Jenis transaksi hanya 'income' atau 'expense'!")
-                    return
-                else:
-                    tanggal=simpledialog.askstring("Tanggal","Masukkan Tanggal Transaksi :\n(DD/MM/YYYY) ")
-                    tanggal=tanggal.strip()
-                    jenis = jenis.strip().lower()  
+        if not pilih or pilih not in akun:
+            messagebox.showwarning("Gagal", "Akun tidak ditemukan!")
+            return
+
+        jenis = simpledialog.askstring(
+            "Jenis Transaksi",
+            "Masukkan jenis transaksi (income/expense):"
+        )
+
+        if not jenis:
+            return 
+            
+        jenis = jenis.strip().lower()
+
+        if jenis not in ["income", "expense"]:
+            messagebox.showwarning("Gagal", "Jenis transaksi hanya 'income' atau 'expense'!")
+            return
 
         if jenis == "income":
             prompt = "Masukkan kategori untuk transaksi income:\nMisalnya: Gaji, Proyek, Uang Bulanan"
         else:
             prompt = "Masukkan kategori untuk transaksi expense:\nMisalnya: Makanan, Tagihan, Entertainment"
         
-        kategori = simpledialog.askstring("Kategori Transaksi", prompt) 
-        kategori = kategori.strip()
+        kategori = simpledialog.askstring("Kategori Transaksi", prompt)
 
-        if kategori=="":
+        if not kategori:
+            return 
+            
+        kategori = kategori.strip().lower()
+
+        if not kategori:
             messagebox.showwarning("Gagal", "Kategori tidak boleh kosong!")
             return
 
-        # input jumlah uang
         jumlah_str = simpledialog.askstring("Jumlah Uang", "Masukkan jumlah (angka):")
         if not jumlah_str:
-            return 
+            return  
             
         try:
             jumlah = int(jumlah_str.strip())
@@ -125,14 +132,12 @@ try:
         except ValueError:
             messagebox.showwarning("Gagal", "Jumlah harus berupa angka!")
             return
-
         
         #TERAPKAN TEMPLATE FINANSIAL JIKA INCOME
         if (current_plan_template == "50-30-20") and (jenis == "income"):
             apply_503020()
         elif  (current_plan_template == "PYF") and (jenis == "income"):
-            apply_PYF()
-            
+            apply_PYF()    
 
         # PLAN LIMIT CHECKING
         bagian = None
@@ -153,27 +158,13 @@ try:
                     )
                     return
         
-        transaksi_baru = {
-            "jenis": jenis,
-            "kategori": kategori,
-            "jumlah": jumlah,
-            "tanggal": tanggal
-        }
-
-        list_lama = akun[pilih]
-        list_baru = []
-
-        for i in list_lama:
-            list_baru += [i]
-        
-        list_baru += [transaksi_baru]
-
-        akun[pilih] = list_baru
+        akun[pilih].append({"jenis": jenis, "kategori": kategori, "jumlah": jumlah})
         messagebox.showinfo("Sukses", f"Transaksi {jenis} '{kategori}' sebesar Rp {jumlah:,} berhasil ditambahkan ke akun '{pilih}'.")
     except Exception as e:
         messagebox.showerror("Error", f"Terjadi kesalahan: {str(e)}")
 
-#Grafik Income Summary
+
+# PIE CHART INCOME
 def pie_income():
     try:
         if not akun:
@@ -212,8 +203,6 @@ def pie_income():
         wedges, texts, autotexts = ax.pie(data.values(), labels=data.keys(), 
                                            autopct='%1.1f%%', colors=colors,
                                            startangle=90)
-        
-        # Make percentage text more readable
         for autotext in autotexts:
             autotext.set_color('white')
             autotext.set_fontweight('bold')
@@ -234,7 +223,8 @@ def pie_income():
     except Exception as e:
         messagebox.showerror("Error", f"Terjadi kesalahan: {str(e)}")
 
-# Grafik Expense Summary
+
+# PIE CHART EXPENSE
 def pie_expense():
     try:
         if not akun:
@@ -273,8 +263,7 @@ def pie_expense():
         wedges, texts, autotexts = ax.pie(data.values(), labels=data.keys(), 
                                            autopct='%1.1f%%', colors=colors,
                                            startangle=90)
-        
-        # Make percentage text more readable
+    
         for autotext in autotexts:
             autotext.set_color('white')
             autotext.set_fontweight('bold')
@@ -295,6 +284,7 @@ def pie_expense():
     except Exception as e:
         messagebox.showerror("Error", f"Terjadi kesalahan: {str(e)}")
 
+
 # TOTAL INCOME (SEMUA AKUN)
 def total_income():
     try:
@@ -306,6 +296,7 @@ def total_income():
         return total
     except Exception:
         return 0
+
 
 # TOTAL EXPENSE (SEMUA AKUN)
 def total_expense():
@@ -319,13 +310,15 @@ def total_expense():
     except Exception:
         return 0
 
+
 # TOTAL BALANCE (INCOME - EXPENSE)
 def total_balance():
     try:
         return total_income() - total_expense()
     except Exception:
         return 0
-    
+
+
 #Hitung inflasi
 def hitung_inflasi():
     
@@ -398,6 +391,7 @@ def loop_reminder(window_utama, nominal, interval_hari):
 
     window_utama.after(ms, lambda: show_popup(window_utama, nominal, interval_hari))
 
+    
 #Memunculkan pesan reminder
 def show_popup(window_target, nominal, interval_hari):
     
@@ -408,7 +402,6 @@ def show_popup(window_target, nominal, interval_hari):
     
    
     loop_reminder(window_target, nominal, interval_hari)
-
 
 
 def apply_503020():
@@ -435,6 +428,7 @@ def apply_503020():
         f"Savings: Rp {int(plan_limits['savings']):,}"
     )
 
+
 #Template Finansial pay yourself first
 def apply_PYF():
     global current_plan_template, plan_limits
@@ -460,6 +454,3 @@ def apply_PYF():
         f"Wants: Rp {int(plan_limits['wants']):,}\n"
         f"Savings: Rp {int(plan_limits['savings']):,}"
     )
-
-
- 
