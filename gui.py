@@ -1,4 +1,3 @@
-
 import tkinter as tk
 from tkinter import simpledialog, messagebox, ttk
 import logic
@@ -8,8 +7,6 @@ root = tk.Tk()
 root.geometry("1100x600")
 root.configure(bg="white")
 root.title("Cash Flow")
-
-# Make the window responsive
 root.grid_rowconfigure(0, weight=1)
 root.grid_columnconfigure(2, weight=1)
 
@@ -62,33 +59,12 @@ def page_transaksi():
     totalbalance_card.grid(row=2, column=0, padx=10, pady=20, sticky="ew")
     totalbalance_card.grid_propagate(False)
     
-    # AKUN DIPILIH
-    selected_account = current_account.get()
-    
-    # PRINT SELECTED DI TERMINAL
-    print(f"DEBUG - Selected Account: '{selected_account}'")
     print(f"DEBUG - Available Accounts: {list(logic.akun.keys())}")
     
-    # 
-    is_specific_account = (
-        selected_account 
-        and selected_account != "" 
-        and selected_account != "All Accounts" 
-        and selected_account in logic.akun
-    )
-    
-    print(f"DEBUG - Is Specific Account: {is_specific_account}")
-    
-    if is_specific_account:
-        tk.Label(totalbalance_card, text=f"Balance: {selected_account}", bg="white", fg="gray", 
+    tk.Label(totalbalance_card, text="Total Cash Balance (All)", bg="white", fg="gray", 
                 font=("Arial", 9)).place(x=10, y=10)
-        balance = logic.account_balance(selected_account)
-        print(f"DEBUG - Account Balance for '{selected_account}': {balance}")
-    else:
-        tk.Label(totalbalance_card, text="Total Cash Balance (All)", bg="white", fg="gray", 
-                font=("Arial", 9)).place(x=10, y=10)
-        balance = logic.total_balance()
-        print(f"DEBUG - Total Balance (All): {balance}")
+    balance = logic.total_balance()
+    print(f"DEBUG - Total Balance (All): {balance}")
     
     #WARNA FONT
     balance_warna = "green" if balance >= 0 else "red"
@@ -101,14 +77,9 @@ def page_transaksi():
     income_card.grid(row=2, column=1, padx=10, pady=20, sticky="ew")
     income_card.grid_propagate(False)
     
-    if is_specific_account:
-        tk.Label(income_card, text=f"Income: {selected_account}", bg="white", fg="gray",
+    tk.Label(income_card, text="Total Income (All)", bg="white", fg="gray",
                 font=("Arial", 9)).place(x=10, y=10)
-        income = logic.account_income(selected_account)
-    else:
-        tk.Label(income_card, text="Total Income (All)", bg="white", fg="gray",
-                font=("Arial", 9)).place(x=10, y=10)
-        income = logic.total_income()
+    income = logic.total_income()
     
     tk.Label(income_card, text=f"Rp {income:,}", bg="white", fg="green", 
              font=("Arial", 14, "bold")).place(x=10, y=40)
@@ -119,14 +90,9 @@ def page_transaksi():
     expenses_card.grid(row=2, column=2, padx=10, pady=20, sticky="ew")
     expenses_card.grid_propagate(False)
     
-    if is_specific_account:
-        tk.Label(expenses_card, text=f"Expense: {selected_account}", bg="white", fg="gray",
+    tk.Label(expenses_card, text="Total Expenses (All)", bg="white", fg="gray",
                 font=("Arial", 9)).place(x=10, y=10)
-        expense = logic.account_expense(selected_account)
-    else:
-        tk.Label(expenses_card, text="Total Expenses (All)", bg="white", fg="gray",
-                font=("Arial", 9)).place(x=10, y=10)
-        expense = logic.total_expense()
+    expense = logic.total_expense()
     
     tk.Label(expenses_card, text=f"Rp {expense:,}", bg="white", fg="red", 
              font=("Arial", 14, "bold")).place(x=10, y=40)
@@ -224,9 +190,9 @@ def page_plan():
     tk.Label(
         main_page,
         text="Financial Planning",
-        bg="white",
+        bg="#E4E4E4",
         fg="black",
-        font=("Poppins", 18, "bold")
+        font=("Arial", 18, "bold")
     ).pack(pady=15)
 
     #Template 50-30-20
@@ -234,7 +200,7 @@ def page_plan():
         main_page, text="Template 50-30-20",
         command=logic.apply_503020,
         bg="white", fg="black", bd=0,
-        font=("Poppins", 11), padx=8, pady=4
+        font=("Arial", 12), padx=8, pady=4
     ).pack(pady=5)
 
     #PYF
@@ -242,7 +208,7 @@ def page_plan():
         main_page, text="Template Pay Yourself First",
         command=logic.apply_PYF,
         bg="white", fg="black", bd=0,
-        font=("Poppins", 11), padx=8, pady=4
+        font=("Arial", 12), padx=8, pady=4
     ).pack(pady=5)
 
     #Reminder Tabungan
@@ -251,16 +217,16 @@ def page_plan():
         command=lambda: logic.start_saving_reminder(root),
         text="Reminder Tabungan",
         bg="white", fg="black", bd=0,
-        font=("Poppins", 11), padx=8, pady=4
-    ).pack(pady=20)
+        font=("Arial", 12), padx=8, pady=4
+    ).pack(pady=5)
 
     #KALKU INFLASI
     tk.Button(
         main_page, text="Hitung Inflasi",
         command=logic.hitung_inflasi,
-        bg="black", fg="white", bd=0,
-        font=("Poppins", 11), padx=10, pady=4
-    ).pack(pady=10)
+        bg="white", fg="black", bd=0,
+        font=("Arial", 12), padx=10, pady=4
+    ).pack(pady=5)
 
 
 # MENU BAR
